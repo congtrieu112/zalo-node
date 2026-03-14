@@ -77,6 +77,7 @@ export class ZaloMessageTrigger implements INodeType {
 	webhookMethods = {
 		default: {
 			async checkExists(this: IHookFunctions): Promise<boolean> {
+				if (typeof api === "undefined" || !api) return false;
 				const webhookData = this.getWorkflowStaticData('node');
 				return !!webhookData.isConnected;
 			},
@@ -127,7 +128,10 @@ export class ZaloMessageTrigger implements INodeType {
 					});
 
 					// Start listening
-					api.listener.start();
+					api.listener.start({ retryOnClose: true });
+					api.listener.on("disconnected", () => { console.log("Zalo WS Disconnected"); api?.listener.start({ retryOnClose: true }); });
+					api.listener.on("error", (e) => { console.log("Zalo WS Error: ", e); api?.listener.start({ retryOnClose: true }); });
+					api.listener.on("closed", () => { console.log("Zalo WS Closed"); api?.listener.start({ retryOnClose: true }); });
 
 					const webhookData = this.getWorkflowStaticData('node');
 					webhookData.isConnected = true;
