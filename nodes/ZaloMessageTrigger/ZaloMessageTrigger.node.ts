@@ -129,9 +129,9 @@ export class ZaloMessageTrigger implements INodeType {
 
 					// Start listening
 					api.listener.start({ retryOnClose: true });
-					api.listener.on("disconnected", () => { console.log("Zalo WS Disconnected"); api?.listener.start({ retryOnClose: true }); });
-					api.listener.on("error", (e) => { console.log("Zalo WS Error: ", e); api?.listener.start({ retryOnClose: true }); });
-					api.listener.on("closed", () => { console.log("Zalo WS Closed"); api?.listener.start({ retryOnClose: true }); });
+					api.listener.on("disconnected", () => { console.log("Zalo WS Disconnected, reconnecting..."); setTimeout(() => { try { api?.listener.start({ retryOnClose: true }); } catch(e) {} }, 5000); });
+					api.listener.on("error", (e: any) => { console.log("Zalo WS Error: ", e); setTimeout(() => { try { api?.listener.start({ retryOnClose: true }); } catch(e) {} }, 5000); });
+					api.listener.on("closed", () => { console.log("Zalo WS Closed, reconnecting..."); setTimeout(() => { try { api?.listener.start({ retryOnClose: true }); } catch(e) {} }, 5000); });
 
 					const webhookData = this.getWorkflowStaticData('node');
 					webhookData.isConnected = true;
